@@ -1,0 +1,2148 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Tracker - Pengelola Keuangan</title>
+    <style>
+        /* Previous CSS remains unchanged */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            min-height: 100vh;
+            padding: 10px;
+            transition: background 0.3s ease; /* For dark mode */
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: background 0.3s ease; /* For dark mode */
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative; /* For settings/mode toggle */
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .balance-display {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .balance-amount {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: white; /* Ensure white background for inputs */
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .transaction-form {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            transition: background 0.3s ease; /* For dark mode */
+        }
+
+        .transaction-form h3 {
+            margin-bottom: 20px;
+            color: #374151;
+        }
+
+        .transaction-history {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px; /* Added margin for consistency */
+            transition: background 0.3s ease; /* For dark mode */
+        }
+
+        .transaction-history h3 {
+            margin-bottom: 20px;
+            color: #374151;
+        }
+
+        .transaction-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease; /* For dark mode */
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-desc {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+
+        .transaction-date {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .transaction-amount {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .amount-negative {
+            color: #ef4444;
+        }
+
+        .amount-positive {
+            color: #10b981;
+        }
+
+        .setup-screen {
+            text-align: center;
+        }
+
+        .setup-screen h2 {
+            margin-bottom: 20px;
+            color: #374151;
+        }
+
+        .setup-screen p {
+            margin-bottom: 30px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none !important; /* Use important to ensure hiding */
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: background 0.3s ease; /* For dark mode */
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .expense-stat {
+            color: #ef4444;
+        }
+
+        .income-stat {
+            color: #10b981;
+        }
+
+        /* Custom Pop-up Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.7) translateY(50px);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 35px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .modal h3 {
+            color: #374151;
+            font-size: 22px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .modal p {
+            color: #6b7280;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            font-size: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            flex-direction: column; /* Stack buttons vertically in modal */
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #e5e7eb;
+            transform: translateY(-1px);
+        }
+
+        .modal-btn-confirm {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Number input formatting indicator */
+        .input-formatted {
+            position: relative;
+        }
+
+        .format-indicator {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #10b981;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .format-indicator.show {
+            opacity: 1;
+        }
+
+        /* NEW STYLES FOR ADDED FEATURES */
+
+        /* Header Buttons (Light/Dark Mode, Settings) */
+        .header-buttons {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+        
+        /* Monthly Budget Display */
+        .budget-display {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+            color: white;
+            text-align: center;
+        }
+        
+        .budget-amount {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .budget-label {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        /* Budget Alert */
+        .budget-alert {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+        }
+
+        .budget-alert.show {
+            opacity: 1;
+        }
+
+        .budget-alert-warning {
+            background-color: #fcd34d; /* Yellow */
+            color: #92400e; /* Darker yellow text */
+        }
+
+        .budget-alert-danger {
+            background-color: #ef4444; /* Red */
+            color: white;
+        }
+        
+        /* Transaction Item Actions (Edit/Delete) */
+        .transaction-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 10px;
+        }
+
+        .transaction-actions .icon-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.2s ease, color 0.2s ease;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .transaction-actions .icon-btn.edit {
+            color: #6366f1; /* Primary blue */
+        }
+        .transaction-actions .icon-btn.delete {
+            color: #ef4444; /* Danger red */
+        }
+        .transaction-actions .icon-btn:hover {
+            transform: scale(1.1);
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        /* Calendar Styles */
+        .calendar-container {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            transition: background 0.3s ease; /* For dark mode */
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #374151;
+        }
+
+        .calendar-header button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .calendar-header button:hover {
+            background: #e5e7eb;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            gap: 5px;
+        }
+
+        .calendar-grid div {
+            padding: 8px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .calendar-grid .day-name {
+            font-weight: 700;
+            color: #6b7280;
+        }
+
+        .calendar-grid .day-cell {
+            background: #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .calendar-grid .day-cell.current-month {
+            background: white;
+        }
+
+        .calendar-grid .day-cell.selected {
+            background: #6366f1;
+            color: white;
+            font-weight: bold;
+        }
+
+        .calendar-grid .day-cell:hover:not(.selected) {
+            background: #d1d5db;
+            transform: translateY(-1px);
+        }
+
+        .calendar-grid .day-cell.has-transactions {
+            border: 2px solid #10b981; /* Green border for days with transactions */
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            transition: background 0.3s ease; /* For dark mode */
+        }
+
+        .chart-container h3 {
+            margin-bottom: 20px;
+            color: #374151;
+        }
+
+        /* Settings Modal */
+        .settings-content {
+            text-align: left;
+        }
+
+        .settings-content h3 {
+            margin-bottom: 20px;
+            color: #374151;
+        }
+
+        .settings-item {
+            margin-bottom: 20px;
+        }
+
+        .settings-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* Navigation Buttons */
+        .main-nav-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .main-nav-buttons .btn {
+            width: auto;
+            flex-grow: 1;
+            margin-bottom: 0;
+            padding: 10px 15px;
+            background: #e5e7eb;
+            color: #374151;
+            border-radius: 10px;
+            font-size: 15px;
+        }
+
+        .main-nav-buttons .btn.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+        }
+        
+        .main-nav-buttons .btn:hover:not(.active) {
+            background: #d1d5db;
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: #e5e7eb;
+        }
+
+        .dark-mode .container {
+            background: #2d3748;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark-mode .header {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        }
+
+        .dark-mode .balance-display,
+        .dark-mode .budget-display {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dark-mode .form-group label,
+        .dark-mode .transaction-form h3,
+        .dark-mode .transaction-history h3,
+        .dark-mode .setup-screen h2,
+        .dark-mode .transaction-desc,
+        .dark-mode .calendar-header,
+        .dark-mode .calendar-grid div,
+        .dark-mode .chart-container h3,
+        .dark-mode .settings-content h3,
+        .dark-mode .settings-item label {
+            color: #e5e7eb;
+        }
+
+        .dark-mode .form-input, .dark-mode .form-select {
+            background-color: #4a5568;
+            border-color: #4a5568;
+            color: #e5e7eb;
+        }
+
+        .dark-mode .form-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .dark-mode .transaction-form,
+        .dark-mode .transaction-history,
+        .dark-mode .stat-card,
+        .dark-mode .transaction-item,
+        .dark-mode .calendar-container,
+        .dark-mode .chart-container,
+        .dark-mode .modal {
+            background: #2c3644;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dark-mode .transaction-date,
+        .dark-mode .stat-label,
+        .dark-mode .setup-screen p,
+        .dark-mode .calendar-header button,
+        .dark-mode .calendar-grid .day-name,
+        .dark-mode .modal p,
+        .dark-mode .modal-btn-cancel {
+            color: #a0aec0;
+        }
+
+        .dark-mode .transaction-actions .icon-btn {
+            color: #cbd5e0;
+        }
+        .dark-mode .transaction-actions .icon-btn.edit {
+            color: #93c5fd; /* Lighter blue */
+        }
+        .dark-mode .transaction-actions .icon-btn.delete {
+            color: #fca5a5; /* Lighter red */
+        }
+        .dark-mode .transaction-actions .icon-btn:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .dark-mode .calendar-grid .day-cell {
+            background: #4a5568;
+            color: #e5e7eb;
+        }
+
+        .dark-mode .calendar-grid .day-cell.current-month {
+            background: #2d3748;
+        }
+
+        .dark-mode .calendar-grid .day-cell.selected {
+            background: #6366f1; /* Stays same for contrast */
+            color: white;
+        }
+
+        .dark-mode .calendar-grid .day-cell:hover:not(.selected) {
+            background: #6b7280;
+        }
+
+        .dark-mode .modal-icon {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        }
+
+        .dark-mode .modal-btn-cancel {
+            background: #4a5568;
+            color: #e5e7eb;
+        }
+        .dark-mode .modal-btn-cancel:hover {
+            background: #6b7280;
+        }
+
+        .dark-mode .main-nav-buttons .btn {
+            background: #4a5568;
+            color: #e5e7eb;
+        }
+
+        .dark-mode .main-nav-buttons .btn.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+        }
+        .dark-mode .main-nav-buttons .btn:hover:not(.active) {
+            background: #6b7280;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Money Tracker</h1>
+            <div class="header-buttons">
+                <button id="themeToggle" class="header-btn">☀️</button>
+                <button id="settingsBtn" class="header-btn">⚙️</button>
+            </div>
+            <div class="balance-display">
+                <div class="balance-amount" id="balanceAmount">Rp 0</div>
+                <div class="balance-label" data-lang-key="currentBalance">Saldo Saat Ini</div>
+            </div>
+            <div class="budget-display">
+                <div class="budget-amount" id="monthlyBudgetDisplay">Rp 0</div>
+                <div class="budget-label" data-lang-key="monthlyBudget">Anggaran Bulanan</div>
+                <div id="budgetAlert" class="budget-alert"></div>
+            </div>
+        </div>
+
+        <div id="setupScreen" class="content setup-screen">
+            <h2 data-lang-key="welcome">Selamat Datang!</h2>
+            <p data-lang-key="initialSetupText">Untuk memulai, masukkan jumlah uang bulanan yang Anda terima dan anggaran bulanan Anda.</p>
+            <div class="form-group">
+                <label for="initialBalance" data-lang-key="monthlyMoneyLabel">Uang Bulanan (Rp)</label>
+                <div class="input-formatted">
+                    <input type="text" id="initialBalance" class="form-input" placeholder="Contoh: 1,000,000">
+                    <span class="format-indicator" id="initialFormatIndicator">✓ Format</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="monthlyBudgetInput" data-lang-key="setMonthlyBudget">Anggaran Bulanan (Rp)</label>
+                <div class="input-formatted">
+                    <input type="text" id="monthlyBudgetInput" class="form-input" placeholder="Contoh: 500,000">
+                    <span class="format-indicator" id="monthlyBudgetFormatIndicator">✓ Format</span>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="setupComplete()" data-lang-key="startTracking">Mulai Tracking</button>
+        </div>
+
+        <div id="mainScreen" class="content hidden">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value income-stat" id="totalIncome">Rp 0</div>
+                    <div class="stat-label" data-lang-key="totalIncome">Total Pemasukan</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value expense-stat" id="totalExpense">Rp 0</div>
+                    <div class="stat-label" data-lang-key="totalExpense">Total Pengeluaran</div>
+                </div>
+            </div>
+
+            <div class="main-nav-buttons">
+                <button class="btn active" id="btnShowAddTransaction" onclick="showSection('addTransactionSection', this)" data-lang-key="addTransactionBtn">Tambah Transaksi</button>
+                <button class="btn" id="btnShowHistory" onclick="showSection('transactionHistorySection', this)" data-lang-key="historyBtn">Riwayat</button>
+                <button class="btn" id="btnShowCalendar" onclick="showSection('calendarSection', this)" data-lang-key="calendarBtn">Kalender</button>
+                <button class="btn" id="btnShowCharts" onclick="showSection('chartsSection', this)" data-lang-key="chartsBtn">Grafik</button>
+            </div>
+
+            <div id="addTransactionSection">
+                <div class="transaction-form">
+                    <h3 data-lang-key="addTransaction">Tambah Transaksi</h3>
+                    <div class="form-group">
+                        <label for="transactionDesc" data-lang-key="description">Deskripsi</label>
+                        <input type="text" id="transactionDesc" class="form-input" placeholder="Contoh: Makan siang">
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionCategory" data-lang-key="category">Kategori</label>
+                        <select id="transactionCategory" class="form-select">
+                            <option value="" disabled selected data-lang-key="selectCategory">Pilih Kategori</option>
+                            <option value="Food" data-lang-key="catFood">Makanan</option>
+                            <option value="Social Life" data-lang-key="catSocialLife">Kehidupan Sosial</option>
+                            <option value="Transport" data-lang-key="catTransport">Transportasi</option>
+                            <option value="Bills" data-lang-key="catBills">Tagihan</option>
+                            <option value="Education" data-lang-key="catEducation">Pendidikan</option>
+                            <option value="House Expenses" data-lang-key="catHouseExpenses">Pengeluaran Rumah</option>
+                            <option value="Healthcare" data-lang-key="catHealthcare">Kesehatan</option>
+                            <option value="Utilities" data-lang-key="catUtilities">Utilitas</option>
+                            <option value="Debt" data-lang-key="catDebt">Utang</option>
+                            <option value="Entertainment" data-lang-key="catEntertainment">Hiburan</option>
+                            <option value="Other" data-lang-key="catOther">Lain-lain</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionAmount" data-lang-key="amount">Jumlah (Rp)</label>
+                        <div class="input-formatted">
+                            <input type="text" id="transactionAmount" class="form-input" placeholder="Contoh: 15,000">
+                            <span class="format-indicator" id="amountFormatIndicator">✓ Format</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionDate" data-lang-key="date">Tanggal</label>
+                        <input type="date" id="transactionDate" class="form-input">
+                    </div>
+                    <button class="btn btn-danger" onclick="addExpense()" data-lang-key="expenseBtn">➖ Pengeluaran</button>
+                    <button class="btn btn-success" onclick="addIncome()" data-lang-key="incomeBtn">➕ Pemasukan</button>
+                    <button id="updateTransactionBtn" class="btn btn-primary hidden" onclick="updateTransaction()" data-lang-key="updateTransactionBtn">Ubah Transaksi</button>
+                    <button id="cancelEditBtn" class="btn btn-secondary hidden" onclick="cancelEdit()" style="background: #ccc; color: #333;" data-lang-key="cancelEditBtn">Batal Ubah</button>
+                </div>
+            </div>
+
+            <div id="transactionHistorySection" class="hidden">
+                <div class="transaction-history">
+                    <h3 data-lang-key="transactionHistory">Riwayat Transaksi</h3>
+                    <div id="transactionList">
+                        <p style="text-align: center; color: #6b7280; margin: 20px 0;" data-lang-key="noTransactions">Belum ada transaksi</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="calendarSection" class="hidden">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button onclick="prevMonth()">◀</button>
+                        <h3 id="currentMonthYear">Juni 2025</h3>
+                        <button onclick="nextMonth()">▶</button>
+                    </div>
+                    <div id="calendarGrid" class="calendar-grid">
+                        </div>
+                </div>
+            </div>
+
+            <div id="chartsSection" class="hidden">
+                <div class="chart-container">
+                    <h3 data-lang-key="expenseTrend">Tren Pengeluaran</h3>
+                    <canvas id="expenseLineChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 data-lang-key="expensesByCategory">Pengeluaran Berdasarkan Kategori</h3>
+                    <canvas id="expensePieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="resetModal">
+        <div class="modal">
+            <div class="modal-icon">⚠️</div>
+            <h3 data-lang-key="resetAppConfirmTitle">Reset Aplikasi</h3>
+            <p data-lang-key="resetAppConfirmText">Apakah Anda yakin ingin menghapus semua data? Tindakan ini akan menghapus semua transaksi dan saldo yang ada.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="hideResetModal()" data-lang-key="cancel">Batal</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmReset()" data-lang-key="yesReset">Ya, Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-icon">⚙️</div>
+            <h3 data-lang-key="settingsTitle">Pengaturan</h3>
+            <div class="settings-content">
+                <div class="form-group settings-item">
+                    <label for="currencySelect" data-lang-key="currencyLabel">Mata Uang:</label>
+                    <select id="currencySelect" class="form-select" onchange="changeCurrency(this.value)">
+                        <option value="IDR" data-lang-key="currencyIDR">Rupiah (IDR)</option>
+                        <option value="USD" data-lang-key="currencyUSD">Dolar AS (USD)</option>
+                        <option value="EUR" data-lang-key="currencyEUR">Euro (EUR)</option>
+                        <option value="JPY" data-lang-key="currencyJPY">Yen Jepang (JPY)</option>
+                    </select>
+                </div>
+                <div class="form-group settings-item">
+                    <label for="languageSelect" data-lang-key="languageLabel">Bahasa:</label>
+                    <select id="languageSelect" class="form-select" onchange="changeLanguage(this.value)">
+                        <option value="id" data-lang-key="langID">Bahasa Indonesia</option>
+                        <option value="en" data-lang-key="langEN">English</option>
+                    </select>
+                </div>
+                <div class="form-group settings-item">
+                    <label for="budgetWarningThreshold" data-lang-key="budgetWarningThresholdLabel">Peringatan Anggaran (%):</label>
+                    <input type="number" id="budgetWarningThreshold" class="form-input" min="1" max="99" value="80" onchange="saveSettings()">
+                </div>
+                <div class="form-group settings-item">
+                    <label for="budgetDangerThreshold" data-lang-key="budgetDangerThresholdLabel">Bahaya Anggaran (%):</label>
+                    <input type="number" id="budgetDangerThreshold" class="form-input" min="1" max="99" value="95" onchange="saveSettings()">
+                </div>
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px;"></div>
+                <button class="btn btn-primary" onclick="exportData()" style="margin-bottom: 10px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;" data-lang-key="exportData">📁 Export Data</button>
+                <button class="btn btn-danger" onclick="showResetModal()" data-lang-key="resetApp">🔄 Reset Aplikasi</button>
+            </div>
+            <div class="modal-buttons" style="flex-direction: row; margin-top: 20px;">
+                <button class="modal-btn btn-primary" onclick="hideSettingsModal()" data-lang-key="close">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Data storage dalam memory
+        let currentBalance = 0;
+        let totalIncome = 0;
+        let totalExpense = 0;
+        let transactions = [];
+        let isSetup = false;
+        let monthlyBudget = 0;
+        let currentEditingTransactionId = null; // To track which transaction is being edited
+
+        // User settings
+        let userCurrency = 'IDR';
+        let userLanguage = 'id';
+        let budgetWarningThreshold = 80; // % of budget spent
+        let budgetDangerThreshold = 95; // % of budget spent
+
+        // For Calendar
+        let currentCalendarDate = new Date(); // Tracks the currently displayed month in calendar
+        let selectedCalendarDate = null; // Tracks the specifically selected date for filtering transactions
+
+        // For Charts
+        let expenseLineChartInstance;
+        let expensePieChartInstance;
+
+        // Language translations
+        const translations = {
+            id: {
+                currentBalance: "Saldo Saat Ini",
+                monthlyBudget: "Anggaran Bulanan",
+                welcome: "Selamat Datang!",
+                initialSetupText: "Untuk memulai, masukkan jumlah uang bulanan yang Anda terima dan anggaran bulanan Anda.",
+                monthlyMoneyLabel: "Uang Bulanan (Rp)",
+                setMonthlyBudget: "Anggaran Bulanan (Rp)",
+                startTracking: "Mulai Tracking",
+                totalIncome: "Total Pemasukan",
+                totalExpense: "Total Pengeluaran",
+                addTransaction: "Tambah Transaksi",
+                description: "Deskripsi",
+                category: "Kategori",
+                selectCategory: "Pilih Kategori",
+                catFood: "Makanan",
+                catSocialLife: "Kehidupan Sosial",
+                catTransport: "Transportasi",
+                catBills: "Tagihan",
+                catEducation: "Pendidikan",
+                catHouseExpenses: "Pengeluaran Rumah",
+                catHealthcare: "Kesehatan",
+                catUtilities: "Utilitas",
+                catDebt: "Utang",
+                catEntertainment: "Hiburan",
+                catOther: "Lain-lain",
+                amount: "Jumlah (Rp)",
+                date: "Tanggal",
+                expenseBtn: "➖ Pengeluaran",
+                incomeBtn: "➕ Pemasukan",
+                updateTransactionBtn: "Ubah Transaksi",
+                cancelEditBtn: "Batal Ubah",
+                transactionHistory: "Riwayat Transaksi",
+                noTransactions: "Belum ada transaksi",
+                resetApp: "🔄 Reset Aplikasi",
+                exportData: "📁 Export Data",
+                resetAppConfirmTitle: "Reset Aplikasi",
+                resetAppConfirmText: "Apakah Anda yakin ingin menghapus semua data? Tindakan ini akan menghapus semua transaksi dan saldo yang ada.",
+                cancel: "Batal",
+                yesReset: "Ya, Reset",
+                settingsTitle: "Pengaturan",
+                currencyLabel: "Mata Uang:",
+                currencyIDR: "Rupiah (IDR)",
+                currencyUSD: "Dolar AS (USD)",
+                currencyEUR: "Euro (EUR)",
+                currencyJPY: "Yen Jepang (JPY)",
+                languageLabel: "Bahasa:",
+                langID: "Bahasa Indonesia",
+                langEN: "English",
+                close: "Tutup",
+                alertInitialAmount: "Mohon masukkan jumlah uang yang valid!",
+                alertBudgetAmount: "Mohon masukkan anggaran bulanan yang valid!",
+                alertDesc: "Mohon masukkan deskripsi transaksi!",
+                alertAmount: "Mohon masukkan jumlah yang valid!",
+                alertCategory: "Mohon pilih kategori transaksi!",
+                alertInsufficientBalance: "Saldo tidak mencukupi!",
+                alertDataExported: "Data berhasil diekspor sebagai file backup!",
+                alertExportFailed: "Gagal mengekspor data. Silakan coba lagi.",
+                alertDataLoaded: "Data Anda telah dimuat otomatis",
+                alertLoadError: "Terjadi kesalahan saat memuat data. Memulai dengan data baru.",
+                alertQuotaExceeded: "Penyimpanan penuh! Beberapa data lama akan dihapus.",
+                monthNames: ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"],
+                dayNames: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+                expenseTrend: "Tren Pengeluaran",
+                expensesByCategory: "Pengeluaran Berdasarkan Kategori",
+                budgetWarningTitle: "Peringatan Anggaran",
+                budgetWarningText: "Anda telah menghabiskan {percentage}% dari anggaran bulanan Anda.",
+                budgetDangerTitle: "Batas Anggaran Tercapai",
+                budgetDangerText: "Anda telah menghabiskan {percentage}% dari anggaran bulanan Anda. Hati-hati!",
+                budgetWarningThresholdLabel: "Peringatan Anggaran (%):",
+                budgetDangerThresholdLabel: "Bahaya Anggaran (%):",
+                addTransactionBtn: "Tambah Transaksi",
+                historyBtn: "Riwayat",
+                calendarBtn: "Kalender",
+                chartsBtn: "Grafik"
+            },
+            en: {
+                currentBalance: "Current Balance",
+                monthlyBudget: "Monthly Budget",
+                welcome: "Welcome!",
+                initialSetupText: "To get started, please enter your monthly income and your monthly budget.",
+                monthlyMoneyLabel: "Monthly Income (Rp)",
+                setMonthlyBudget: "Monthly Budget (Rp)",
+                startTracking: "Start Tracking",
+                totalIncome: "Total Income",
+                totalExpense: "Total Expense",
+                addTransaction: "Add Transaction",
+                description: "Description",
+                category: "Category",
+                selectCategory: "Select Category",
+                catFood: "Food",
+                catSocialLife: "Social Life",
+                catTransport: "Transport",
+                catBills: "Bills",
+                catEducation: "Education",
+                catHouseExpenses: "House Expenses",
+                catHealthcare: "Healthcare",
+                catUtilities: "Utilities",
+                catDebt: "Debt",
+                catEntertainment: "Entertainment",
+                catOther: "Other",
+                amount: "Amount (Rp)",
+                date: "Date",
+                expenseBtn: "➖ Expense",
+                incomeBtn: "➕ Income",
+                updateTransactionBtn: "Update Transaction",
+                cancelEditBtn: "Cancel Edit",
+                transactionHistory: "Transaction History",
+                noTransactions: "No transactions yet",
+                resetApp: "🔄 Reset App",
+                exportData: "📁 Export Data",
+                resetAppConfirmTitle: "Reset Application",
+                resetAppConfirmText: "Are you sure you want to delete all data? This action will clear all transactions and balances.",
+                cancel: "Cancel",
+                yesReset: "Yes, Reset",
+                settingsTitle: "Settings",
+                currencyLabel: "Currency:",
+                currencyIDR: "Indonesian Rupiah (IDR)",
+                currencyUSD: "US Dollar (USD)",
+                currencyEUR: "Euro (EUR)",
+                currencyJPY: "Japanese Yen (JPY)",
+                languageLabel: "Language:",
+                langID: "Bahasa Indonesia",
+                langEN: "English",
+                close: "Close",
+                alertInitialAmount: "Please enter a valid monthly income!",
+                alertBudgetAmount: "Please enter a valid monthly budget!",
+                alertDesc: "Please enter a transaction description!",
+                alertAmount: "Please enter a valid amount!",
+                alertCategory: "Please select a transaction category!",
+                alertInsufficientBalance: "Insufficient balance!",
+                alertDataExported: "Data successfully exported as backup file!",
+                alertExportFailed: "Failed to export data. Please try again.",
+                alertDataLoaded: "Your data has been automatically loaded",
+                alertLoadError: "An error occurred while loading data. Starting with new data.",
+                alertQuotaExceeded: "Storage full! Some old data will be deleted.",
+                monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+                dayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+                expenseTrend: "Expense Trend",
+                expensesByCategory: "Expenses by Category",
+                budgetWarningTitle: "Budget Warning",
+                budgetWarningText: "You have spent {percentage}% of your monthly budget.",
+                budgetDangerTitle: "Budget Limit Reached",
+                budgetDangerText: "You have spent {percentage}% of your monthly budget. Be careful!",
+                budgetWarningThresholdLabel: "Budget Warning Threshold (%):",
+                budgetDangerThresholdLabel: "Budget Danger Threshold (%):",
+                addTransactionBtn: "Add Transaction",
+                historyBtn: "History",
+                calendarBtn: "Calendar",
+                chartsBtn: "Charts"
+            }
+        };
+
+        // Format number dengan koma ribuan
+        function formatNumberWithCommas(num) {
+            if (num === null || num === undefined) return '';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Parse number dari string dengan koma
+        function parseFormattedNumber(str) {
+            return parseFloat(str.replace(/,/g, '')) || 0;
+        }
+
+        // Auto format input saat user mengetik
+        function setupAutoFormat(inputId, indicatorId) {
+            const input = document.getElementById(inputId);
+            const indicator = document.getElementById(indicatorId);
+            
+            input.addEventListener('input', function(e) {
+                let value = e.target.value;
+                
+                // Hapus semua karakter selain angka
+                let numbers = value.replace(/[^\d]/g, '');
+                
+                if (numbers) {
+                    // Format dengan koma
+                    let formatted = formatNumberWithCommas(numbers);
+                    e.target.value = formatted;
+                    
+                    // Show format indicator
+                    if (indicator) {
+                        indicator.classList.add('show');
+                        setTimeout(() => {
+                            indicator.classList.remove('show');
+                        }, 1500);
+                    }
+                } else {
+                    e.target.value = '';
+                }
+            });
+
+            // Prevent non-numeric input
+            input.addEventListener('keypress', function(e) {
+                // Allow backspace, delete, tab, escape, enter
+                if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    (e.keyCode === 65 && e.ctrlKey === true) ||
+                    (e.keyCode === 67 && e.ctrlKey === true) ||
+                    (e.keyCode === 86 && e.ctrlKey === true) ||
+                    (e.keyCode === 88 && e.ctrlKey === true)) {
+                    return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Load data saat aplikasi dimulai
+        window.onload = function() {
+            loadData();
+            applyLanguage(userLanguage); // Apply language on load
+            applyTheme(); // Apply theme on load
+
+            if (isSetup) {
+                showMainScreen();
+                // Select the "Add Transaction" section by default when loading main screen
+                showSection('addTransactionSection', document.getElementById('btnShowAddTransaction'));
+            }
+            
+            // Setup auto formatting untuk input fields
+            setupAutoFormat('initialBalance', 'initialFormatIndicator');
+            setupAutoFormat('monthlyBudgetInput', 'monthlyBudgetFormatIndicator');
+            setupAutoFormat('transactionAmount', 'amountFormatIndicator');
+            
+            // Set default date to current date
+            document.getElementById('transactionDate').valueAsDate = new Date();
+
+            // Tampilkan pesan selamat datang kembali jika ada data tersimpan
+            if (isSetup && transactions.length > 0) {
+                setTimeout(() => {
+                    showWelcomeBackMessage();
+                }, 1000);
+            }
+
+            // Charts and Calendar are updated by updateDisplay() or showSection() calls
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+            updateCharts();
+        };
+
+        // Pesan selamat datang kembali
+        function showWelcomeBackMessage() {
+            const welcomeMsg = document.createElement('div');
+            welcomeMsg.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                color: white;
+                padding: 20px 30px;
+                border-radius: 15px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+                z-index: 1002;
+                opacity: 0;
+                transition: all 0.5s ease;
+            `;
+            welcomeMsg.innerHTML = `
+                <div style="font-size: 24px; margin-bottom: 10px;">👋</div>
+                <div style="font-weight: 600; margin-bottom: 5px;">${translations[userLanguage].welcomeBackTitle || 'Selamat Datang Kembali!'}</div>
+                <div style="font-size: 14px; opacity: 0.9;">${translations[userLanguage].alertDataLoaded}</div>
+            `;
+            
+            document.body.appendChild(welcomeMsg);
+            
+            setTimeout(() => {
+                welcomeMsg.style.opacity = '1';
+            }, 100);
+            
+            setTimeout(() => {
+                welcomeMsg.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(welcomeMsg);
+                }, 500);
+            }, 3000);
+        }
+
+        // Auto-save setiap kali ada perubahan data
+        function autoSave() {
+            saveData();
+            // Tampilkan indikator penyimpanan (opsional)
+            showSaveIndicator();
+            updateBudgetAlert(); // Update budget alert on every save
+            updateCharts(); // Update charts on every save
+        }
+
+        // Tampilkan indikator bahwa data telah disimpan
+        function showSaveIndicator() {
+            // Buat elemen indikator jika belum ada
+            let indicator = document.getElementById('saveIndicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'saveIndicator';
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                    padding: 10px 15px;
+                    border-radius: 25px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                    z-index: 1001;
+                    opacity: 0;
+                    transform: translateY(-10px);
+                    transition: all 0.3s ease;
+                    pointer-events: none;
+                `;
+                indicator.innerHTML = '💾 Data tersimpan';
+                document.body.appendChild(indicator);
+            }
+            
+            // Animasi tampil
+            setTimeout(() => {
+                indicator.style.opacity = '1';
+                indicator.style.transform = 'translateY(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                indicator.style.opacity = '0';
+                indicator.style.transform = 'translateY(-10px)';
+            }, 2000);
+        }
+
+        // Backup data ke file (fitur tambahan)
+        function exportData() {
+            try {
+                const data = {
+                    currentBalance: currentBalance,
+                    totalIncome: totalIncome,
+                    totalExpense: totalExpense,
+                    transactions: transactions,
+                    isSetup: isSetup,
+                    monthlyBudget: monthlyBudget,
+                    userCurrency: userCurrency,
+                    userLanguage: userLanguage,
+                    budgetWarningThreshold: budgetWarningThreshold,
+                    budgetDangerThreshold: budgetDangerThreshold,
+                    exportDate: new Date().toISOString(),
+                    appVersion: '2.1' // Updated version
+                };
+                
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `money-tracker-backup-${new Date().getTime()}.json`;
+                link.click();
+                
+                alert(translations[userLanguage].alertDataExported);
+            } catch (error) {
+                console.error('Error mengekspor data:', error);
+                alert(translations[userLanguage].alertExportFailed);
+            }
+        }
+
+        // Deteksi jika user akan menutup browser/tab
+        window.addEventListener('beforeunload', function(e) {
+            // Pastikan data tersimpan sebelum keluar
+            saveData();
+            
+            // Tampilkan peringatan jika ada data yang belum tersimpan
+            if (transactions.length > 0) {
+                const message = 'Data Anda telah disimpan otomatis. Yakin ingin keluar?';
+                e.returnValue = message;
+                return message;
+            }
+        });
+
+        // Auto-save setiap 30 detik (sebagai backup)
+        setInterval(function() {
+            if (isSetup) {
+                saveData();
+                console.log('Auto-save: Data disimpan pada', new Date().toLocaleTimeString('id-ID'));
+            }
+        }, 30000); // 30 detik
+
+        // Key untuk localStorage
+        const STORAGE_KEY = 'moneyTrackerData';
+
+        // Simpan data ke localStorage
+        function saveData() {
+            try {
+                const data = {
+                    currentBalance: currentBalance,
+                    totalIncome: totalIncome,
+                    totalExpense: totalExpense,
+                    transactions: transactions,
+                    isSetup: isSetup,
+                    monthlyBudget: monthlyBudget,
+                    userCurrency: userCurrency,
+                    userLanguage: userLanguage,
+                    budgetWarningThreshold: budgetWarningThreshold,
+                    budgetDangerThreshold: budgetDangerThreshold,
+                    lastSaved: new Date().toISOString()
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                console.log('Data berhasil disimpan ke localStorage');
+            } catch (error) {
+                console.error('Error menyimpan data ke localStorage:', error);
+                // Fallback jika localStorage penuh
+                if (error.name === 'QuotaExceededError') {
+                    alert(translations[userLanguage].alertQuotaExceeded);
+                    // Hapus data lama dan coba simpan lagi
+                    localStorage.clear();
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                }
+            }
+        }
+
+        // Load data dari localStorage
+        function loadData() {
+            try {
+                const savedData = localStorage.getItem(STORAGE_KEY);
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    currentBalance = data.currentBalance || 0;
+                    totalIncome = data.totalIncome || 0;
+                    totalExpense = data.totalExpense || 0;
+                    transactions = data.transactions || [];
+                    isSetup = data.isSetup || false;
+                    monthlyBudget = data.monthlyBudget || 0;
+                    userCurrency = data.userCurrency || 'IDR';
+                    userLanguage = data.userLanguage || 'id';
+                    budgetWarningThreshold = data.budgetWarningThreshold !== undefined ? data.budgetWarningThreshold : 80;
+                    budgetDangerThreshold = data.budgetDangerThreshold !== undefined ? data.budgetDangerThreshold : 95;
+                    
+                    console.log('Data berhasil dimuat dari localStorage');
+                    
+                    // Tampilkan info terakhir disimpan jika ada
+                    if (data.lastSaved) {
+                        const lastSavedDate = new Date(data.lastSaved);
+                        console.log('Data terakhir disimpan:', lastSavedDate.toLocaleString('id-ID'));
+                    }
+                } else {
+                    console.log('Tidak ada data tersimpan sebelumnya, memulai data baru');
+                }
+            } catch (error) {
+                console.error('Error memuat data dari localStorage:', error);
+                // Reset to default values if there's an error
+                currentBalance = 0;
+                totalIncome = 0;
+                totalExpense = 0;
+                transactions = [];
+                isSetup = false;
+                monthlyBudget = 0;
+                userCurrency = 'IDR';
+                userLanguage = 'id';
+                budgetWarningThreshold = 80;
+                budgetDangerThreshold = 95;
+                
+                alert(translations[userLanguage].alertLoadError);
+            }
+        }
+
+        function setupComplete() {
+            const initialAmountStr = document.getElementById('initialBalance').value;
+            const initialAmount = parseFormattedNumber(initialAmountStr);
+            
+            const monthlyBudgetStr = document.getElementById('monthlyBudgetInput').value;
+            const budgetAmount = parseFormattedNumber(monthlyBudgetStr);
+
+            if (!initialAmount || initialAmount <= 0) {
+                alert(translations[userLanguage].alertInitialAmount);
+                return;
+            }
+            if (budgetAmount <= 0) {
+                alert(translations[userLanguage].alertBudgetAmount);
+                return;
+            }
+
+            currentBalance = initialAmount;
+            totalIncome = initialAmount;
+            monthlyBudget = budgetAmount;
+            isSetup = true;
+
+            // Add initial transaction
+            transactions.unshift({
+                id: Date.now(),
+                description: 'Uang Bulanan',
+                amount: initialAmount,
+                type: 'income',
+                category: 'Income', // Default category for initial income
+                date: new Date().toISOString().split('T')[0] //YYYY-MM-DD format for date input
+            });
+
+            saveData();
+            showMainScreen();
+            showSection('addTransactionSection', document.getElementById('btnShowAddTransaction')); // Ensure Add Transaction is shown first
+        }
+
+        function showMainScreen() {
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('mainScreen').classList.remove('hidden');
+            document.getElementById('monthlyBudgetDisplay').textContent = formatCurrency(monthlyBudget);
+            updateDisplay();
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+            updateCharts();
+        }
+
+        // Section navigation
+        function showSection(sectionId, clickedButton) {
+            // Hide all sections
+            document.getElementById('addTransactionSection').classList.add('hidden');
+            document.getElementById('transactionHistorySection').classList.add('hidden');
+            document.getElementById('calendarSection').classList.add('hidden');
+            document.getElementById('chartsSection').classList.add('hidden');
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.main-nav-buttons .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show the selected section
+            document.getElementById(sectionId).classList.remove('hidden');
+            // Add active class to the clicked button
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+
+            // Specific updates when showing certain sections
+            if (sectionId === 'transactionHistorySection') {
+                updateDisplay(); // Ensure history is updated
+            } else if (sectionId === 'calendarSection') {
+                renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+                selectedCalendarDate = null; // Clear any previously selected date when re-opening calendar
+                updateDisplay(); // Refresh history to show all transactions
+            } else if (sectionId === 'chartsSection') {
+                updateCharts(); // Re-render charts
+            }
+        }
+
+
+        function addExpense() {
+            const desc = document.getElementById('transactionDesc').value.trim();
+            const category = document.getElementById('transactionCategory').value;
+            const amountStr = document.getElementById('transactionAmount').value;
+            const amount = parseFormattedNumber(amountStr);
+            const date = document.getElementById('transactionDate').value;
+
+            if (!desc) {
+                alert(translations[userLanguage].alertDesc);
+                return;
+            }
+            if (!category) {
+                alert(translations[userLanguage].alertCategory);
+                return;
+            }
+            if (!amount || amount <= 0) {
+                alert(translations[userLanguage].alertAmount);
+                return;
+            }
+            if (amount > currentBalance) {
+                alert(translations[userLanguage].alertInsufficientBalance);
+                return;
+            }
+
+            // Add transaction
+            transactions.unshift({
+                id: Date.now(),
+                description: desc,
+                amount: amount,
+                type: 'expense',
+                category: category,
+                date: date //YYYY-MM-DD
+            });
+
+            currentBalance -= amount;
+            totalExpense += amount;
+
+            // Clear form
+            document.getElementById('transactionDesc').value = '';
+            document.getElementById('transactionAmount').value = '';
+            document.getElementById('transactionCategory').value = '';
+            document.getElementById('transactionDate').valueAsDate = new Date(); // Reset date
+
+            autoSave();
+            updateDisplay();
+        }
+
+        function addIncome() {
+            const desc = document.getElementById('transactionDesc').value.trim();
+            const amountStr = document.getElementById('transactionAmount').value;
+            const amount = parseFormattedNumber(amountStr);
+            const date = document.getElementById('transactionDate').value;
+
+            if (!desc) {
+                alert(translations[userLanguage].alertDesc);
+                return;
+            }
+            if (!amount || amount <= 0) {
+                alert(translations[userLanguage].alertAmount);
+                return;
+            }
+
+            // Add transaction
+            transactions.unshift({
+                id: Date.now(),
+                description: desc,
+                amount: amount,
+                type: 'income',
+                category: 'Income', // Incomes typically don't need detailed categories for budgeting
+                date: date //YYYY-MM-DD
+            });
+
+            currentBalance += amount;
+            totalIncome += amount;
+
+            // Clear form
+            document.getElementById('transactionDesc').value = '';
+            document.getElementById('transactionAmount').value = '';
+            document.getElementById('transactionCategory').value = ''; // Clear category for income
+            document.getElementById('transactionDate').valueAsDate = new Date(); // Reset date
+
+            autoSave();
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            // Update balance
+            document.getElementById('balanceAmount').textContent = formatCurrency(currentBalance);
+            
+            // Update statistics
+            document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
+            document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
+            document.getElementById('monthlyBudgetDisplay').textContent = formatCurrency(monthlyBudget);
+
+            // Update transaction list
+            const transactionList = document.getElementById('transactionList');
+            
+            // Filter transactions by selected calendar date if any
+            let filteredTransactions = transactions;
+            if (selectedCalendarDate) {
+                const selectedDateStr = selectedCalendarDate.toISOString().split('T')[0];
+                filteredTransactions = transactions.filter(t => t.date === selectedDateStr);
+            }
+
+            if (filteredTransactions.length === 0) {
+                transactionList.innerHTML = `<p style="text-align: center; color: #6b7280; margin: 20px 0;">${translations[userLanguage].noTransactions}</p>`;
+                return;
+            }
+
+            let html = '';
+            filteredTransactions.forEach(transaction => {
+                const isExpense = transaction.type === 'expense';
+                const amountClass = isExpense ? 'amount-negative' : 'amount-positive';
+                const sign = isExpense ? '-' : '+';
+
+                // Format date for display
+                const displayDate = new Date(transaction.date + 'T00:00:00').toLocaleDateString(userLanguage); // Add T00:00:00 to avoid timezone issues
+
+                html += `
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div class="transaction-desc">${transaction.description} (${transaction.category})</div>
+                            <div class="transaction-date">${displayDate}</div>
+                        </div>
+                        <div class="transaction-amount ${amountClass}">
+                            ${sign}${formatCurrency(transaction.amount)}
+                        </div>
+                        <div class="transaction-actions">
+                            <button class="icon-btn edit" onclick="editTransaction(${transaction.id})">✏️</button>
+                            <button class="icon-btn delete" onclick="deleteTransaction(${transaction.id})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            transactionList.innerHTML = html;
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth()); // Re-render calendar to update transaction dots
+            updateBudgetAlert(); // Call budget alert update
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat(userLanguage, {
+                style: 'currency',
+                currency: userCurrency,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // Budget Alert Logic
+        function updateBudgetAlert() {
+            const budgetAlertElement = document.getElementById('budgetAlert');
+            const currentMonthExpenses = transactions
+                .filter(t => {
+                    const transactionDate = new Date(t.date);
+                    return t.type === 'expense' &&
+                           transactionDate.getMonth() === new Date().getMonth() &&
+                           transactionDate.getFullYear() === new Date().getFullYear();
+                })
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            const percentageSpent = monthlyBudget > 0 ? (currentMonthExpenses / monthlyBudget) * 100 : 0;
+            
+            budgetAlertElement.classList.remove('show', 'budget-alert-warning', 'budget-alert-danger');
+            budgetAlertElement.textContent = '';
+
+            if (percentageSpent >= budgetDangerThreshold) {
+                budgetAlertElement.textContent = translations[userLanguage].budgetDangerText.replace('{percentage}', percentageSpent.toFixed(0));
+                budgetAlertElement.classList.add('show', 'budget-alert-danger');
+            } else if (percentageSpent >= budgetWarningThreshold) {
+                budgetAlertElement.textContent = translations[userLanguage].budgetWarningText.replace('{percentage}', percentageSpent.toFixed(0));
+                budgetAlertElement.classList.add('show', 'budget-alert-warning');
+            }
+        }
+
+        // Edit Transaction
+        function editTransaction(id) {
+            const transactionToEdit = transactions.find(t => t.id === id);
+            if (!transactionToEdit) return;
+
+            // Populate the form
+            document.getElementById('transactionDesc').value = transactionToEdit.description;
+            document.getElementById('transactionCategory').value = transactionToEdit.category;
+            document.getElementById('transactionAmount').value = formatNumberWithCommas(transactionToEdit.amount);
+            document.getElementById('transactionDate').value = transactionToEdit.date;
+
+            // Store the ID of the transaction being edited
+            currentEditingTransactionId = id;
+
+            // Change button visibility
+            document.getElementById('updateTransactionBtn').classList.remove('hidden');
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            document.querySelector('.btn-danger').classList.add('hidden'); // Hide expense button
+            document.querySelector('.btn-success').classList.add('hidden'); // Hide income button
+
+            // Switch to the 'Add Transaction' section if not already there
+            showSection('addTransactionSection', document.getElementById('btnShowAddTransaction'));
+        }
+
+        function updateTransaction() {
+            if (currentEditingTransactionId === null) return;
+
+            const desc = document.getElementById('transactionDesc').value.trim();
+            const category = document.getElementById('transactionCategory').value;
+            const amountStr = document.getElementById('transactionAmount').value;
+            const amount = parseFormattedNumber(amountStr);
+            const date = document.getElementById('transactionDate').value;
+
+            if (!desc) { alert(translations[userLanguage].alertDesc); return; }
+            if (!category) { alert(translations[userLanguage].alertCategory); return; }
+            if (!amount || amount <= 0) { alert(translations[userLanguage].alertAmount); return; }
+
+            // Find the index of the transaction being edited
+            const index = transactions.findIndex(t => t.id === currentEditingTransactionId);
+            if (index === -1) return;
+
+            const oldTransaction = transactions[index];
+
+            // Revert old transaction's effect on balance/totals
+            if (oldTransaction.type === 'expense') {
+                currentBalance += oldTransaction.amount;
+                totalExpense -= oldTransaction.amount;
+            } else {
+                currentBalance -= oldTransaction.amount;
+                totalIncome -= oldTransaction.amount;
+            }
+
+            // Apply new transaction's effect
+            const newType = (category === 'Income' || amount > 0 && oldTransaction.type === 'income') ? 'income' : 'expense'; // Logic to keep income type if category is income or was originally income
+            if (newType === 'expense') {
+                if (amount > currentBalance && oldTransaction.type !== 'expense') { // Only check if changing from income to expense
+                     alert(translations[userLanguage].alertInsufficientBalance);
+                     // Re-apply old transaction's effect if failed
+                     currentBalance -= oldTransaction.amount;
+                     totalIncome += oldTransaction.amount;
+                     return;
+                }
+                currentBalance -= amount;
+                totalExpense += amount;
+            } else {
+                currentBalance += amount;
+                totalIncome += amount;
+            }
+
+
+            // Update the transaction in the array
+            transactions[index] = {
+                id: currentEditingTransactionId,
+                description: desc,
+                amount: amount,
+                type: newType, // Update type based on context/category
+                category: category,
+                date: date
+            };
+
+            // Reset form and buttons
+            cancelEdit();
+            autoSave();
+            updateDisplay();
+        }
+
+        function cancelEdit() {
+            document.getElementById('transactionDesc').value = '';
+            document.getElementById('transactionCategory').value = '';
+            document.getElementById('transactionAmount').value = '';
+            document.getElementById('transactionDate').valueAsDate = new Date(); // Reset date
+
+            document.getElementById('updateTransactionBtn').classList.add('hidden');
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+            document.querySelector('.btn-danger').classList.remove('hidden');
+            document.querySelector('.btn-success').classList.remove('hidden');
+
+            currentEditingTransactionId = null; // Clear the editing ID
+        }
+
+        // Delete Transaction
+        function deleteTransaction(id) {
+            if (!confirm('Are you sure you want to delete this transaction?')) return;
+
+            const index = transactions.findIndex(t => t.id === id);
+            if (index === -1) return;
+
+            const deletedTransaction = transactions[index];
+
+            // Revert transaction's effect on balance/totals
+            if (deletedTransaction.type === 'expense') {
+                currentBalance += deletedTransaction.amount;
+                totalExpense -= deletedTransaction.amount;
+            } else {
+                currentBalance -= deletedTransaction.amount;
+                totalIncome -= deletedTransaction.amount;
+            }
+
+            // Remove from array
+            transactions.splice(index, 1);
+
+            autoSave();
+            updateDisplay();
+        }
+
+        // Calendar Functions
+        function renderCalendar(year, month) {
+            const monthNames = translations[userLanguage].monthNames;
+            const dayNames = translations[userLanguage].dayNames;
+            const calendarGrid = document.getElementById('calendarGrid');
+            const currentMonthYear = document.getElementById('currentMonthYear');
+
+            currentMonthYear.textContent = `${monthNames[month]} ${year}`;
+            calendarGrid.innerHTML = '';
+
+            // Add day names
+            dayNames.forEach(day => {
+                const dayNameDiv = document.createElement('div');
+                dayNameDiv.classList.add('day-name');
+                dayNameDiv.textContent = day;
+                calendarGrid.appendChild(dayNameDiv);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Pad for the first day of the month
+            for (let i = 0; i < firstDay; i++) {
+                calendarGrid.appendChild(document.createElement('div'));
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('day-cell');
+                
+                // Add class for current month days
+                if (date.getMonth() === month && date.getFullYear() === year) {
+                    dayCell.classList.add('current-month');
+                }
+
+                // Add selected class if this is the selected date
+                if (selectedCalendarDate && date.toDateString() === selectedCalendarDate.toDateString()) {
+                    dayCell.classList.add('selected');
+                }
+
+                // Check for transactions on this day
+                const hasTransactions = transactions.some(t => {
+                    const transactionDate = new Date(t.date + 'T00:00:00'); // Ensure consistent date object
+                    return transactionDate.getFullYear() === year &&
+                           transactionDate.getMonth() === month &&
+                           transactionDate.getDate() === day;
+                });
+
+                if (hasTransactions) {
+                    dayCell.classList.add('has-transactions');
+                }
+
+                dayCell.textContent = day;
+                dayCell.addEventListener('click', () => selectDate(date));
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+
+        function prevMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+            selectedCalendarDate = null; // Clear selected date when changing month
+            updateDisplay(); // Refresh transaction list with all transactions
+        }
+
+        function nextMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+            selectedCalendarDate = null; // Clear selected date when changing month
+            updateDisplay(); // Refresh transaction list with all transactions
+        }
+
+        function selectDate(date) {
+            selectedCalendarDate = date;
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth()); // Re-render to highlight selected
+            updateDisplay(); // Filter transactions based on selected date
+        }
+
+
+        // Chart Functions
+        function updateCharts() {
+            // Destroy previous instances if they exist
+            if (expenseLineChartInstance) {
+                expenseLineChartInstance.destroy();
+            }
+            if (expensePieChartInstance) {
+                expensePieChartInstance.destroy();
+            }
+
+            const currentMonthTransactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date + 'T00:00:00');
+                const now = new Date();
+                return transactionDate.getMonth() === now.getMonth() && transactionDate.getFullYear() === now.getFullYear();
+            });
+
+            // Line Chart: Daily Expenses Trend
+            const dailyExpenses = {};
+            currentMonthTransactions.filter(t => t.type === 'expense').forEach(t => {
+                const date = t.date; //YYYY-MM-DD
+                dailyExpenses[date] = (dailyExpenses[date] || 0) + t.amount;
+            });
+
+            const sortedDates = Object.keys(dailyExpenses).sort();
+            const expenseAmounts = sortedDates.map(date => dailyExpenses[date]);
+
+            const lineCtx = document.getElementById('expenseLineChart').getContext('2d');
+            expenseLineChartInstance = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [{
+                        label: translations[userLanguage].totalExpense,
+                        data: expenseAmounts,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: document.body.classList.contains('dark-mode') ? '#e5e7eb' : '#374151'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: document.body.classList.contains('dark-mode') ? '#a0aec0' : '#6b7280'
+                            },
+                            grid: {
+                                color: document.body.classList.contains('dark-mode') ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: document.body.classList.contains('dark-mode') ? '#a0aec0' : '#6b7280',
+                                callback: function(value, index, values) {
+                                    return formatCurrency(value);
+                                }
+                            },
+                            grid: {
+                                color: document.body.classList.contains('dark-mode') ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Pie Chart: Expenses by Category
+            const categoryExpenses = {};
+            currentMonthTransactions.filter(t => t.type === 'expense' && t.category !== 'Income').forEach(t => {
+                categoryExpenses[t.category] = (categoryExpenses[t.category] || 0) + t.amount;
+            });
+
+            const pieLabels = Object.keys(categoryExpenses);
+            const pieData = Object.values(categoryExpenses);
+            const backgroundColors = [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED', '#A0D911', '#FF6600', '#00CC99'
+            ]; // More colors if needed
+
+            const pieCtx = document.getElementById('expensePieChart').getContext('2d');
+            expensePieChartInstance = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieData,
+                        backgroundColor: backgroundColors.slice(0, pieLabels.length),
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: document.body.classList.contains('dark-mode') ? '#e5e7eb' : '#374151'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // Modal functions (Existing)
+        function showResetModal() {
+            const modal = document.getElementById('resetModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideResetModal() {
+            const modal = document.getElementById('resetModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        function confirmReset() {
+            currentBalance = 0;
+            totalIncome = 0;
+            totalExpense = 0;
+            transactions = [];
+            isSetup = false;
+            monthlyBudget = 0;
+            selectedCalendarDate = null; // Reset calendar selection
+
+            document.getElementById('initialBalance').value = '';
+            document.getElementById('monthlyBudgetInput').value = ''; // Clear budget input
+            document.getElementById('mainScreen').classList.add('hidden');
+            document.getElementById('setupScreen').classList.remove('hidden');
+
+            autoSave();
+            hideResetModal();
+            updateCharts(); // Clear charts
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('resetModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideResetModal();
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideResetModal();
+                hideSettingsModal(); // Also close settings modal
+            }
+        });
+
+        // Settings Modal Functions
+        function showSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            // Set current values in settings
+            document.getElementById('currencySelect').value = userCurrency;
+            document.getElementById('languageSelect').value = userLanguage;
+            document.getElementById('budgetWarningThreshold').value = budgetWarningThreshold;
+            document.getElementById('budgetDangerThreshold').value = budgetDangerThreshold;
+        }
+
+        function hideSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            saveSettings(); // Save settings when modal closes
+        }
+
+        // Add event listener to the settings button
+        document.getElementById('settingsBtn').addEventListener('click', showSettingsModal);
+
+        // Close settings modal when clicking outside
+        document.getElementById('settingsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideSettingsModal();
+            }
+        });
+
+        function saveSettings() {
+            userCurrency = document.getElementById('currencySelect').value;
+            userLanguage = document.getElementById('languageSelect').value;
+            budgetWarningThreshold = parseInt(document.getElementById('budgetWarningThreshold').value);
+            budgetDangerThreshold = parseInt(document.getElementById('budgetDangerThreshold').value);
+            autoSave(); // Save updated settings
+            updateDisplay(); // Update display with new currency/language
+            updateCharts(); // Update chart labels with new language
+            // Re-apply language immediately for settings elements
+            applyLanguage(userLanguage);
+            updateBudgetAlert(); // Recalculate and show alert based on new thresholds
+        }
+
+        function changeCurrency(currencyCode) {
+            userCurrency = currencyCode;
+            updateDisplay(); // Re-render with new currency
+            updateCharts();
+        }
+
+        function changeLanguage(langCode) {
+            userLanguage = langCode;
+            applyLanguage(langCode);
+            updateDisplay(); // Re-render to apply new language to dynamic content
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth()); // Re-render calendar for day/month names
+            updateCharts(); // Update chart labels
+        }
+
+        function applyLanguage(langCode) {
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[langCode] && translations[langCode][key]) {
+                    element.textContent = translations[langCode][key];
+                }
+            });
+            // Specific updates for placeholders and calendar
+            if (langCode === 'id') {
+                document.getElementById('initialBalance').placeholder = 'Contoh: 1,000,000';
+                document.getElementById('monthlyBudgetInput').placeholder = 'Contoh: 500,000';
+                document.getElementById('transactionDesc').placeholder = 'Contoh: Makan siang';
+                document.getElementById('transactionAmount').placeholder = 'Contoh: 15,000';
+            } else { // default to English
+                document.getElementById('initialBalance').placeholder = 'Example: 1,000,000';
+                document.getElementById('monthlyBudgetInput').placeholder = 'Example: 500,000';
+                document.getElementById('transactionDesc').placeholder = 'Example: Lunch';
+                document.getElementById('transactionAmount').placeholder = 'Example: 15,000';
+            }
+            renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+            document.title = translations[userLanguage].appTitle || 'Money Tracker - Pengelola Keuangan';
+            updateBudgetAlert(); // Update alert text
+        }
+
+        // Light/Dark Mode Toggle
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            this.textContent = isDarkMode ? '🌙' : '☀️'; // Update icon
+            updateCharts(); // Re-render charts to apply new colors
+        });
+
+        function applyTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').textContent = '🌙';
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.getElementById('themeToggle').textContent = '☀️';
+            }
+        }
+    </script>
+</body>
+</html>
+
+
